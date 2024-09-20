@@ -18,7 +18,7 @@ from selenium.webdriver.chrome.options import Options
 
 orders = []
 passwort = "38FxUecv6TQHxkS"
-# print(orders[0].orderid)
+
 
 def get_latest_mail_body():
     mail = imaplib.IMAP4_SSL('imap.web.de')
@@ -42,7 +42,7 @@ def get_mail_body(email:str)-> str:
         if part.get_content_type() == "text/plain":
             charset = part.get_content_charset()
             body = part.get_payload(decode=True)
-            # print(body)
+        
             obj = body.decode("ascii")
             obj = obj.replace("\r\n" , ", ")
             obj = obj[:len(obj)-1].replace('', '')
@@ -75,28 +75,28 @@ def check_order_state(f_num:str, a_num:str)->str:
     driver.get("https://www.fotoparadies.de/service/auftragsstatus.html#/?orderid="+a_num+"&locationid="+ f_num)
     while(find_elemten("/html/body/cw-order-tracking-app/div/div", driver)):
         print(1)
-    time.sleep(1.5)
+    time.sleep(5)
 
-    if(find_elemten("/html/body/cw-order-tracking-app/div/div", driver) == False):
+    if(find_elemten("/html/body/cw-order-tracking-app/div/div", driver) != False):
+        print("AAAAAAAAAA")
         return "nicht_da"
     
 
-    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[1]/div/img").get_attribute("src")
-    if "inactive" not in img_link and img_link != "":
+    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[1]/div/img", driver).get_attribute("src")
+    if "_active" in img_link and img_link != "":
         return "erhalten"
     
-    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[2]/div/img").get_attribute("src")
-    if "inactive" not in img_link and img_link != "":
+    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[2]/div/img", driver).get_attribute("src")
+    if "_active" in img_link and img_link != "":
         return "gefertig"
                             
-    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[3]/div/img").get_attribute("src")
-    if "inactive" not in img_link and img_link != "":
+    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[3]/div/img", driver).get_attribute("src")
+    if "_active" in img_link and img_link != "":
         return "wird_geliefert"
-    if "SHIPPED" not in img_link and img_link != "":
-        return "abholbereit"
+
     
-    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[4]/div/img").get_attribute("src")
-    if "inactive" not in img_link and img_link != "":
+    img_link = find_elemten("/html/body/cw-order-tracking-app/cw-order-tracking/div/div/cw-accordion/div/div/cw-tile/cw-order-timeline/div[2]/div[4]/div/img", driver).get_attribute("src")
+    if "_active" in img_link and img_link != "":
         return "abholbereit"
     
 
@@ -110,7 +110,7 @@ def find_elemten(x_path:str,driver:webdriver.Chrome):
 def send_mail(f_num:str, a_num:str, state:str):
     s = SMTP('smtp.web.de', 587)
     s.starttls()
-    s.login("db.zeug@web.de", "")#
+    s.login("db.zeug@web.de", passwort)#
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "DM AUFTRAG " + state
@@ -129,35 +129,52 @@ def send_mail(f_num:str, a_num:str, state:str):
         text = """\
         Hi,
         dein auftrag """ + a_num + """ wird zu der Filiale  """ + f_num + """ geliefert"""
-
+    elif state == "gefertig":
+        text = """\
+        Hi,
+        dein auftrag """ + a_num + """ wird gearbeitet"""
     message.attach(MIMEText(text, "plain"))
     s.sendmail("db.zeug@web.de", "moritz.albach@gmail.com", message.as_string())
     s.quit()
 
 
 def job():
-    print("starting job")
-    print(orders)
+ 
     get_new_f_and_a_num()
-    print("got new orders")
-    print(orders)
+
+
+
     for i, order in  enumerate(orders):
         order_state = check_order_state(order[0], order[1])
+   
+
+
+
         if(order_state == "abholbereit"):
-            send_mail(order[0], order[1], "abholbereit")
-            orders.pop(i)
-        if(order_state == "erhalten"):
-            send_mail(order[0], order[1], "erhalten")
+            if(order_state != order[2]):
+                send_mail(order[0], order[1], "abholbereit")
+            
         if(order_state == "wird_geliefert"):
-            send_mail(order[0], order[1], "wird_geliefert")
+            if(order_state != order[2]):
+                send_mail(order[0], order[1], "wird_geliefert")
+
+        if(order_state == "gefertig"):
+            if(order_state != order[2]):
+                send_mail(order[0], order[1], "gefertig")     
+
+        if(order_state == "erhalten"):
+            if(order_state != order[2]):
+            
+                send_mail(order[0], order[1], "erhalten")
+
+   
 
         orders[i][2] = order_state
-    print("ordesr at the end")
+   
     print(orders)
-    print("end job")
 
 
-schedule.every(1).minutes.do(job)
+schedule.every(10).minutes.do(job)
 
 while True:
     schedule.run_pending()
