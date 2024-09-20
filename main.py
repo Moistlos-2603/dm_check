@@ -14,10 +14,10 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
-
+import getpass
 
 orders = []
-passwort = "38FxUecv6TQHxkS"
+passwort = getpass.getpass()
 
 
 def get_latest_mail_body():
