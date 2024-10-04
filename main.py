@@ -54,7 +54,7 @@ def get_mail_body(email:str)-> str:
             charset = part.get_content_charset()
             body = part.get_payload(decode=True)
         
-            obj = body.decode("ascii")
+            obj = body.decode("utf8")
             obj = obj.replace("\r\n" , ", ")
             obj = obj[:len(obj)-1].replace('', '')
             return obj
