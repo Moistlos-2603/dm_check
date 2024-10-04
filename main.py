@@ -23,6 +23,13 @@ passwort = os.environ["PASSWORT"]
 from_mail = os.environ["FROM_MAIL"]
 to_mail = os.environ["TO_MAIL"]
 
+try:
+    if os.environ["DEBUG"]:
+        debug = True
+except KeyError:
+    debug = False
+
+
 
 def get_latest_mail_body():
     mail = imaplib.IMAP4_SSL('imap.web.de')
@@ -115,6 +122,10 @@ def send_mail(f_num:str, a_num:str, state:str):
     s = SMTP('smtp.web.de', 587)
     s.starttls()
     s.login(from_mail, passwort)#
+    
+    if debug == True:
+        print("\n send mail")
+        print(state)
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "DM AUFTRAG " + state
@@ -172,14 +183,14 @@ def job():
                 send_mail(order[0], order[1], "erhalten")
 
    
-
+            
         orders[i][2] = order_state
-   
-    print(orders)
+    if debug == True:
+        print("\n"+orders)
 
 
-schedule.every(10).minutes.do(job)
+schedule.every(5).minutes.do(job)
 
 while True:
     schedule.run_pending()
-    time.sleep(5)
+    time.sleep(1)
