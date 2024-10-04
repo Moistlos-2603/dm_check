@@ -18,11 +18,15 @@ import getpass
 
 orders = []
 passwort = getpass.getpass()
+print("From Mail")
+from_mail = getpass.getuser
+print("To Mail")
+to_mail = getpass.getuser
 
 
 def get_latest_mail_body():
     mail = imaplib.IMAP4_SSL('imap.web.de')
-    mail.login("db.zeug@web.de", passwort)
+    mail.login(from_mail, passwort)
     mail.list()
     mail.select("inbox") # connect to inbox.
     result, data = mail.search(None, "ALL")
@@ -110,12 +114,12 @@ def find_elemten(x_path:str,driver:webdriver.Chrome):
 def send_mail(f_num:str, a_num:str, state:str):
     s = SMTP('smtp.web.de', 587)
     s.starttls()
-    s.login("db.zeug@web.de", passwort)#
+    s.login(from_mail, passwort)#
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "DM AUFTRAG " + state
-    message["From"] = "db.zeug@web.de"
-    message["To"] = "moritz.albach@gmail.com"
+    message["From"] = from_mail
+    message["To"] = to_mail
 
     if state == "abholbereit":
         text = """\
