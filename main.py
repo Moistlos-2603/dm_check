@@ -19,9 +19,9 @@ from selenium.webdriver.chrome.options import Options
 import getpass
 
 orders = []
-passwort = os.environ["passwort"]
-from_mail = os.environ["from_mail"]
-to_mail = os.environ["to_mail"]
+passwort = os.environ["PASSWORT"]
+from_mail = os.environ["FROM_MAIL"]
+to_mail = os.environ["TO_MAIL"]
 
 
 def get_latest_mail_body():
