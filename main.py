@@ -1,4 +1,6 @@
 # import schedule 
+
+import os
 import time
 import schedule
 
@@ -17,11 +19,9 @@ from selenium.webdriver.chrome.options import Options
 import getpass
 
 orders = []
-passwort = getpass.getpass()
-print("From Mail")
-from_mail = getpass.getuser
-print("To Mail")
-to_mail = getpass.getuser
+passwort = os.environ["passwort"]
+from_mail = os.environ["from_mail"]
+to_mail = os.environ["to_mail"]
 
 
 def get_latest_mail_body():
