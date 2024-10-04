@@ -36,7 +36,7 @@ def get_latest_mail_body():
     mail.login(from_mail, passwort)
     mail.list()
     mail.select("inbox") # connect to inbox.
-    result, data = mail.search(None, "ALL")
+    result, data = mail.search(None, 'FROM "moritz.albach@gmail.com"')
 
     ids = data[0]
     id_list = ids.split()
